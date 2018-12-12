@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
     table.increments().notNullable().primary()
     table.varchar('loca_id', 255).notNullable()
     table.text('comment').notNullable()
+    table.integer('rating').notNullable()
     table.integer('user_id').notNullable()
     table.foreign('user_id').references('users.id').onDelete('cascade')
   })

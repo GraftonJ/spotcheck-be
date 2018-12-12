@@ -28,13 +28,14 @@ router.get('/:id', (req, res, next) => {
 })
 
 //Post a comment
-//http POST http://localhost:3000/comments loca_id="0A80IDh1Ag7jW4_D9sjQPQ" user_id=3 comment="This is a test post comment"
+// http POST http://localhost:3000/comments loca_id="YELP_ID" user_id=3 rating=3 comment="This is a test post comment"
 router.post('/', (req, res, next) => {
   knex('comments')
     .insert({
       "loca_id": req.body.loca_id,
       "user_id": req.body.user_id,
-      "comment": req.body.comment
+      "comment": req.body.comment,
+      "rating": req.body.rating,
     })
     .returning('*')
     .then((data) => {
@@ -66,7 +67,7 @@ router.delete('/:id', (req, res, next) => {
 })
 
 //Edit a comments
-//http PATCH  http://localhost:3000/comments/3 comment="test comment666" loca_id="0A80IDh1Ag7jW4_D9sjQPQ" user_id=3
+//http PATCH  http://localhost:3000/comments/3 comment="test comment666" rating=4 loca_id="YELP_ID" user_id=3
 router.patch('/:id', (req, res, next) => {
     knex('comments')
     .where('id', req.params.id)
@@ -74,7 +75,8 @@ router.patch('/:id', (req, res, next) => {
     .update({
       "loca_id": req.body.loca_id,
       "user_id": req.body.user_id,
-      "comment": req.body.comment
+      "comment": req.body.comment,
+      "rating": req.body.rating,
     })
     .returning('*')
     .then((data) => {
