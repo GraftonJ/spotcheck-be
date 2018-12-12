@@ -3,6 +3,7 @@ const router = express.Router()
 const knex = require('../knex')
 
 //Get all records from comments
+//http http://localhost:3000/comments
 router.get('/', (req, res, next) => {
   knex('comments')
     .then((rows) => {
@@ -59,6 +60,25 @@ router.delete('/:id', (req, res, next) => {
   .catch((err) => {
     next(err)
   })
+})
+
+//Edit a comments
+router.patch('/:id', (req, res, next) => {
+    knex('comments')
+    .where('id', req.params.id)
+    .limit(1)
+    .update({
+      "loca_id": req.body.loca_id,
+      "user_id": req.body.user_id,
+      "comment": req.body.comment
+    })
+    .returning('*')
+    .then((data) => {
+      res.json(data[0])
+    })
+    .catch((err) => {
+      next(err)
+    })
 })
 
 
