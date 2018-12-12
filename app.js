@@ -11,6 +11,7 @@ var commentsRouter = require('./routes/comments')
 //Add ratingsRouter Below
 //Add usersRouter Below
 //Add check_ins Router Below
+var check_insRouter = require('./routes/check_ins')
 
 var app = express();
 
@@ -31,6 +32,7 @@ app.use('/comments', commentsRouter)
 //Add app.use ratings below
 //Add app.use users below
 //Add app.use check_ins below
+app.use('/check_ins', check_insRouter)
 
 
 // catch 404 and forward to error handler

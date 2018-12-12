@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
     table.integer('user_id').notNullable()
     table.foreign('user_id').references('users.id').onDelete('cascade')
     table.varchar('loca_id', 255).notNullable()
-		table.timestamps(true, true)
+    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
 	})
 }
 exports.down = function(knex, Promise) {
