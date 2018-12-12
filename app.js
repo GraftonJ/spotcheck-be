@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 //Add commentsRouter Below
 var commentsRouter = require('./routes/comments')
 //Add ratingsRouter Below
+var ratingsRouter = require('./routes/ratings')
 //Add usersRouter Below
 //Add check_ins Router Below
 
@@ -29,6 +30,7 @@ app.use('/users', usersRouter);
 //Add app.use comments Below
 app.use('/comments', commentsRouter)
 //Add app.use ratings below
+app.use('/ratings', ratingsRouter)
 //Add app.use users below
 //Add app.use check_ins below
 
