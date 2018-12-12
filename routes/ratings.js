@@ -49,7 +49,7 @@ router.post('', (req, res, next) => {
 });
 
 /* **************************************************
-*  PATCH /
+*  PATCH /:id
 *  Update a user's rating of a location
 *  @param id (integer)
 *  @body user_id (integer)
