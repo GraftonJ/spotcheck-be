@@ -15,6 +15,7 @@ router.get('/', (req, res, next) => {
 })
 
 //Get one record from comments
+//http http://localhost:3000/comments/1
 router.get('/:id', (req, res, next) => {
   knex('comments')
     .where('id', req.params.id)
@@ -27,6 +28,7 @@ router.get('/:id', (req, res, next) => {
 })
 
 //Post a comment
+//http POST http://localhost:3000/comments loca_id="0A80IDh1Ag7jW4_D9sjQPQ" user_id=3 comment="This is a test post comment"
 router.post('/', (req, res, next) => {
   knex('comments')
     .insert({
@@ -44,6 +46,7 @@ router.post('/', (req, res, next) => {
 })
 
 //Delete a comment
+//http DELETE http://localhost:3000/comments/3
 router.delete('/:id', (req, res, next) => {
   knex('comments')
   .where('id', req.params.id)
@@ -63,6 +66,7 @@ router.delete('/:id', (req, res, next) => {
 })
 
 //Edit a comments
+//http PATCH  http://localhost:3000/comments/3 comment="test comment666" loca_id="0A80IDh1Ag7jW4_D9sjQPQ" user_id=3
 router.patch('/:id', (req, res, next) => {
     knex('comments')
     .where('id', req.params.id)
