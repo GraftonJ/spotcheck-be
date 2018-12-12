@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 var commentsRouter = require('./routes/comments')
 var ratingsRouter = require('./routes/ratings')
 var check_insRouter = require('./routes/check_ins')
+var yelpRouter = require('./routes/yelp')
 
 var app = express();
 
@@ -28,6 +29,7 @@ app.use('/users', usersRouter);
 app.use('/comments', commentsRouter);
 app.use('/ratings', ratingsRouter);
 app.use('/check_ins', check_insRouter);
+app.use('/yelp', yelpRouter);
 
 
 // catch 404 and forward to error handler
