@@ -13,7 +13,7 @@ const { chkBodyParams } = require('./params'); // destructure the chkBodyParams 
 *  @body rating (integer 1 to 5)
 *  Return
 *    200 { rating: { id, loca_id, user_id, rating } }
-http POST localhost:3000/ratings user_id=1 loca_id=0A80IDh1Ag7jW4_D9sjQPQ rating=3
+http POST localhost:3000/ratings user_id=1 loca_id=YELP_LOCA_ID_HERE rating=3
 ***************************************************** */
 router.post('', (req, res, next) => {
   console.log("-- POST route ratings/: ", req.params.user_id);

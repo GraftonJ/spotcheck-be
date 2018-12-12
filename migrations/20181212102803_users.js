@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
 		table.varchar(`fname`, 255).notNullable()
 		table.varchar(`lname`, 255).notNullable()
 		table.varchar(`email`, 255).notNullable()
+		table.unique('email')
 		table.varchar(`pswd_hash`, 255).notNullable()
 		table.varchar(`dog_names`, 255).notNullable()
 	})
