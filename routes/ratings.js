@@ -48,4 +48,59 @@ router.post('', (req, res, next) => {
     });
 });
 
+/* **************************************************
+*  PATCH /:id
+*  Update a user's rating of a location
+*  @param id (integer)
+*  @body user_id (integer)
+*  @body loca_id (string, the Yelp loca id)
+*  @body rating (integer 1 to 5)
+*  Return
+*    200 { rating: { id, loca_id, user_id, rating } }
+http PATCH localhost:3000/ratings/2 rating=3
+***************************************************** */
+router.patch('/:id', (req, res, next) => {
+  console.log("-- PATCH /ratings route: ", req.params.user_id);
+  const oParams = {
+    rating: 'int',
+  };
+  if (!chkBodyParams(oParams, req, res, next)) {
+    return;
+  }
+  // TODO:  Add guard that only user can change their own rating
+
+  knex('ratings')
+    .where('id', req.params.id)
+    .update({
+      rating: req.body.rating,
+    })
+    .returning('*')
+    .then((aRecs) => {
+      console.log("--> patch returning: ", aRecs);
+      res.status(201).json({ rating: aRecs[0] });
+      // return;
+    })
+    .catch((error) => {
+      next(routeCatch(`--- PATCH /ratings route, error: `, error));
+    });
+});
+
+/* **************************************************
+*  GET /
+*  Get all ratings
+*  Return
+*    200 { ratings: [ { id, loca_id, user_id, rating }, { ... } ]
+http GET localhost:3000/ratings
+***************************************************** */
+router.get('/', (req, res, next) => {
+  console.log(`-- GET /ratings route`);
+  knex("ratings")
+    .then((aRecs) => {
+      res.status(200).json({ ratings: aRecs });
+    })
+    .catch((error) => {
+      next(routeCatch(`--- GET /ratings route`, error));
+    });
+});
+
 module.exports = router
