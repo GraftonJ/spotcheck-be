@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM loaded in test.js");
   console.log("before axios call");
-  const param = { locaIds: ['MCd01xGZtmfSsH_RUj4pAA', '0A80IDh1Ag7jW4_D9sjQPQ']};
+  const param = { locaIds: ['0A80IDh1Ag7jW4_D9sjQPQ', 'MCd01xGZtmfSsH_RUj4pAA']};
   axios.post('yelp/', param)
     .then((res) => {
       console.log("--- res.data: ", res.data);
