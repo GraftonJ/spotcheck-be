@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../knex')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const routeCatch = require('./routeCatch');
 const { chkBodyParams } = require('./params'); // destructure the chkBodyParams out of require('./params') returned object
@@ -63,7 +65,7 @@ router.post('/', (req, res, next) => {
   }
   console.log('oNewUser: ', oNewUser);
 
-  // check that the email address no already in use
+  // check that the email address not already in use
   knex('users')
     .where('email', email)
     .then((aRecsMatchingEmail) => {
@@ -72,7 +74,7 @@ router.post('/', (req, res, next) => {
         res.status(409).json({ error: 'email already exists' });
         return;
       }
-      // add the new user
+
       console.log("continue: email is unique");
 
       // get the password hash
@@ -81,6 +83,8 @@ router.post('/', (req, res, next) => {
         .then((pswd_hash) => {
           console.log("pswd_hash ", pswd_hash);
           oNewUser.pswd_hash = pswd_hash;
+
+          // add the new user
           knex('users')
             .insert([oNewUser]) // param is in the format of the fields so use destructuring
             .returning('*') // gets array of the inserted records
@@ -144,20 +148,20 @@ router.patch('/:id', (req, res, next) => {
 });
 
 /* **************************************************
-*  GET /login
-*  Try to log in the user
+*  POST /login
+*  Try to log in the user, if successful set JWT in header
 *  @body email (string)
-*  @body passwordf (string)
+*  @body password (string)
 *  Return
 *    200 { user: { name, dog_names, ... } }
-*    404 { error: 'email not found'}
-*    404 { error: 'password doesn't match }
+*    403 { error: 'email not found'}
+*    403 { error: 'password doesn't match }
 http POST localhost:3000/users/login email=unknown@gmail.com password=secret
 http POST localhost:3000/users/login email=nuser@gmail.com password=wrong
 http POST localhost:3000/users/login email=nuser@gmail.com password=secret
 ***************************************************** */
 router.post('/login', (req, res, next) => {
-  console.log(`-- GET /users/login route`);
+  console.log(`-- POST /users/login route`);
   const oParams = {
     email: 'string',
     password: 'string',
@@ -172,7 +176,7 @@ router.post('/login', (req, res, next) => {
     .then((aRecs) => {
       if (!aRecs.length) {
         console.log("fail: email not found");
-        res.status(404).json({ error: 'email not found' });
+        res.status(403).json({ error: 'email not found' });
         return;
       }
       const user = aRecs[0];
@@ -183,13 +187,20 @@ router.post('/login', (req, res, next) => {
         .then((match) => {
           if (!match) {
             console.log("fail: pswd bad");
-            res.status(404).json({ error: 'incorrect password' });
+            res.status(403).json({ error: 'incorrect password' });
             return;
           }
-          // setup the JWT
 
-          // return success
-          res.status(200).json({ user });
+          // setup the JWT
+          const payload = {
+            userId: user.id,
+            loggedIn: true,
+          };
+          console.log('----- JWT_KEY: ', process.env.JWT_KEY);
+          const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7 days' });
+
+          // set token in header and return success
+          res.set('Auth', `Bearer: ${token}`).status(200).json({ user });
           return;
         })
         .catch((error) => {
@@ -199,6 +210,41 @@ router.post('/login', (req, res, next) => {
     .catch((error) => {
       next(routeCatch(`--- GET /users route`, error));
     });
+});
+
+/* **************************************************
+*  POST /logout
+*  Log the user out if they are logged in
+*    resets the JWT payload loggedIn to false
+*  @body email (string)
+*  @body password (string)
+*  Return
+*    200 { message: 'success' }
+http POST localhost:3000/users/logout
+***************************************************** */
+router.post('/logout', (req, res, next) => {
+  console.log(`-- POST /users/logout route`);
+
+  // is there a JWT??
+  // check that a auth token is even passed
+  const auth = req.headers.auth;
+  if (!auth) {
+    console.log("-- no auth token");
+  } else {
+    console.log('-- auth token: ', auth);
+  }
+
+  // setup the JWT
+  const payload = {
+    userId: 0,
+    loggedIn: false,
+  };
+  console.log('----- JWT_KEY: ', process.env.JWT_KEY);
+  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7 days' });
+
+  // set token in header and return success
+  res.set('Auth', `Bearer: ${token}`).status(200).json({ message: 'success' });
+  return;
 });
 
 
