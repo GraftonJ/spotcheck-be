@@ -6,22 +6,80 @@ const routeCatch = require('./routeCatch');
 const { chkBodyParams } = require('./params'); // destructure the chkBodyParams out of require('./params') returned object
 
 /* **************************************************
-*  PATCH /:id
-*  Update a user's info
-*  @body fname (string)
-*  @body lname (string)
+*  POST
+*  Add a new user
+*    Their email address must be unique
+*  @body name (string)
 *  @body email (string)
 *  @body dog_names (string)
 *  Return
-*    200 { user: { id, fname, lname, ... } }
+*    200 { user: { id, name, ... } }
+
+http POST localhost:3000/users/ name="New User" email=nuser@gmail.com dog_names=Rex password=secret
+***************************************************** */
+router.post('/', (req, res, next) => {
+  console.log("-- POST /users route: ", req.params.user_id);
+  const oParams = {
+    name: 'string',
+    email: 'string',
+    dog_names: 'string',
+    password: 'string',
+  };
+  if (!chkBodyParams(oParams, req, res, next)) {
+    return;
+  }
+  const { name, email, dog_names, password } = req.body;
+  const oNewUser = {
+    name,
+    email,
+    dog_names,
+    pswd_hash: password,
+  }
+  console.log('oNewUser: ', oNewUser);
+
+  // check that the email address no already in use
+  knex('users')
+    .where('email', email)
+    .then((aRecsMatchingEmail) => {
+      if (aRecsMatchingEmail.length) {
+        console.log("fail: email address already exists");
+        res.status(409).json({ error: 'email already exists' });
+        return;
+      }
+      // add the new user
+      console.log("continue: email is unique");
+      knex('users')
+        .insert([oNewUser]) // param is in the format of the fields so use destructuring
+        .returning('*') // gets array of the inserted records
+        .then((aRecs) => {
+          console.log("--> insert returning: ", aRecs);
+          res.status(201).json({ user: aRecs[0] });
+          return;
+        })
+        .catch((error) => {
+          next(routeCatch(`--- (inner) POST /users route, error: `, error));
+        });
+    })
+    .catch((error) => {
+      next(routeCatch(`--- POST /users route, error: `, error));
+    });
+});
+
+/* **************************************************
+*  PATCH /:id
+*  Update a user's info
+*  @body name (string)
+*  @body email (string)
+*  @body dog_names (string)
+*  Return
+*    200 { user: { id, name, ... } }
 *  TODO: guard that user can only update their own info
-http PATCH localhost:3000/users/1 fname=John lname=Doe email=jdoe@gmail.com dog_names=Sparky
+http PATCH localhost:3000/users/1 name="John Doe" email=jdoe@gmail.com dog_names=Sparky
 ***************************************************** */
 router.patch('/:id', (req, res, next) => {
   console.log("-- PATCH /users route: ", req.params.user_id);
   const oParams = {
-    fname: 'string',
-    lname: 'string',
+    name: 'string',
     email: 'string',
     dog_names: 'string',
   };
@@ -33,8 +91,7 @@ router.patch('/:id', (req, res, next) => {
   knex('users')
     .where('id', req.params.id)
     .update({
-      fname: req.body.fname,
-      lname: req.body.lname,
+      name: req.body.name,
       email: req.body.email,
       dog_names: req.body.dog_names,
     })
@@ -53,7 +110,7 @@ router.patch('/:id', (req, res, next) => {
 *  GET /
 *  Get all users
 *  Return
-*    200 { ratings: [ { id, fname, lname, ... }, { ... } ]
+*    200 { ratings: [ { id, name, ... }, { ... } ]
 http GET localhost:3000/users
 ***************************************************** */
 router.get('/', (req, res, next) => {
