@@ -4,9 +4,9 @@ exports.seed = function(knex, Promise) {
     .then(() => {
       // Inserts seed entries
       return knex('users').insert([
-        {id: 1, fname: 'Cassi', lname: 'Bailey', email: 'cbaily@gmail.com', pswd_hash: '1234', dog_names: 'Spot the Dog'},
-        {id: 2, fname: 'Steve', lname: 'Wilson', email: 'swilson@gmail.com', pswd_hash: '1234', dog_names: 'Bender and Scooter'},
-        {id: 3, fname: 'Isabel', lname: 'Sampson', email: 'isampson@gmail.com', pswd_hash: '1234', dog_names: 'Luna'},
+        {id: 1, name: 'Cassi Bailey', email: 'cbaily@gmail.com', pswd_hash: '1234', dog_names: 'Spot the Dog'},
+        {id: 2, name: 'Steve Wilson', email: 'swilson@gmail.com', pswd_hash: '1234', dog_names: 'Bender and Scooter'},
+        {id: 3, name: 'Isabel Sampson', email: 'isampson@gmail.com', pswd_hash: '1234', dog_names: 'Luna'},
       ])
       .then(() => {
 				 // Moves id column (PK) auto-incremented to correct value after inserts
