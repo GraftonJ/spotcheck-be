@@ -1,9 +1,34 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../knex')
+const bcrypt = require('bcrypt')
 
 const routeCatch = require('./routeCatch');
 const { chkBodyParams } = require('./params'); // destructure the chkBodyParams out of require('./params') returned object
+
+const SALT_ROUNDS = 2;
+
+/* **************************************************
+*  hashAsync()
+*  Returns Promise for pswd_hash
+***************************************************** */
+function hashAsync(password) {
+  // let sHash = "";
+  return bcrypt.hash(password, SALT_ROUNDS)
+    .then((hashValue) => {
+      // sHash = hashValue;
+      // console.log("hash: ", hashValue);
+      return hashValue;
+    });
+}
+
+/* **************************************************
+*  hashCompareAsync()
+*  Returns Promise for t/f if pswd matches hash
+***************************************************** */
+function hashCompareAsync(password, pswd_hash) {
+  return bcrypt.compare(password, pswd_hash);
+}
 
 /* **************************************************
 *  POST
@@ -14,7 +39,8 @@ const { chkBodyParams } = require('./params'); // destructure the chkBodyParams 
 *  @body dog_names (string)
 *  Return
 *    200 { user: { id, name, ... } }
-
+*    409 { error": "email already exists" }
+*
 http POST localhost:3000/users/ name="New User" email=nuser@gmail.com dog_names=Rex password=secret
 ***************************************************** */
 router.post('/', (req, res, next) => {
@@ -48,16 +74,27 @@ router.post('/', (req, res, next) => {
       }
       // add the new user
       console.log("continue: email is unique");
-      knex('users')
-        .insert([oNewUser]) // param is in the format of the fields so use destructuring
-        .returning('*') // gets array of the inserted records
-        .then((aRecs) => {
-          console.log("--> insert returning: ", aRecs);
-          res.status(201).json({ user: aRecs[0] });
-          return;
+
+      // get the password hash
+      let pswd_hash = '';
+      hashAsync(password)
+        .then((pswd_hash) => {
+          console.log("pswd_hash ", pswd_hash);
+          oNewUser.pswd_hash = pswd_hash;
+          knex('users')
+            .insert([oNewUser]) // param is in the format of the fields so use destructuring
+            .returning('*') // gets array of the inserted records
+            .then((aRecs) => {
+              console.log("--> insert returning: ", aRecs);
+              res.status(201).json({ user: aRecs[0] });
+              return;
+            })
+            .catch((error) => {
+              next(routeCatch(`--- (3) POST /users route, error: `, error));
+            });
         })
         .catch((error) => {
-          next(routeCatch(`--- (inner) POST /users route, error: `, error));
+          next(routeCatch(`--- (2) POST /users route, error: `, error));
         });
     })
     .catch((error) => {
