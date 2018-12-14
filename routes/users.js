@@ -144,6 +144,65 @@ router.patch('/:id', (req, res, next) => {
 });
 
 /* **************************************************
+*  GET /login
+*  Try to log in the user
+*  @body email (string)
+*  @body passwordf (string)
+*  Return
+*    200 { user: { name, dog_names, ... } }
+*    404 { error: 'email not found'}
+*    404 { error: 'password doesn't match }
+http POST localhost:3000/users/login email=unknown@gmail.com password=secret
+http POST localhost:3000/users/login email=nuser@gmail.com password=wrong
+http POST localhost:3000/users/login email=nuser@gmail.com password=secret
+***************************************************** */
+router.post('/login', (req, res, next) => {
+  console.log(`-- GET /users/login route`);
+  const oParams = {
+    email: 'string',
+    password: 'string',
+  };
+  if (!chkBodyParams(oParams, req, res, next)) {
+    return;
+  }
+  const { email, password } = req.body;
+  console.log("email, password: ", email, password);
+  knex("users")
+    .where('email', email)
+    .then((aRecs) => {
+      if (!aRecs.length) {
+        console.log("fail: email not found");
+        res.status(404).json({ error: 'email not found' });
+        return;
+      }
+      const user = aRecs[0];
+      console.log('email found');
+      const { pswd_hash } = aRecs[0];
+      console.log('pswd hash: ', pswd_hash);
+      hashCompareAsync(password, pswd_hash)
+        .then((match) => {
+          if (!match) {
+            console.log("fail: pswd bad");
+            res.status(404).json({ error: 'incorrect password' });
+            return;
+          }
+          // setup the JWT
+
+          // return success
+          res.status(200).json({ user });
+          return;
+        })
+        .catch((error) => {
+          next(routeCatch(`--- GET /users route`, error));
+        })
+      })
+    .catch((error) => {
+      next(routeCatch(`--- GET /users route`, error));
+    });
+});
+
+
+/* **************************************************
 *  GET /
 *  Get all users
 *  Return
