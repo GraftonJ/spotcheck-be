@@ -39,14 +39,16 @@ function hashCompareAsync(password, pswd_hash) {
 *  @body name (string)
 *  @body email (string)
 *  @body dog_names (string)
+*  @body password (string)
 *  Return
 *    200 { user: { id, name, ... } }
+*      200 will also return the JWT login token in header
 *    409 { error": "email already exists" }
 *
 http POST localhost:3000/users/ name="New User" email=nuser@gmail.com dog_names=Rex password=secret
 ***************************************************** */
 router.post('/', (req, res, next) => {
-  console.log("-- POST /users route: ", req.params.user_id);
+  console.log("-- POST /users route: ", req.params.name);
   const oParams = {
     name: 'string',
     email: 'string',
@@ -90,8 +92,14 @@ router.post('/', (req, res, next) => {
             .returning('*') // gets array of the inserted records
             .then((aRecs) => {
               console.log("--> insert returning: ", aRecs);
-              res.status(201).json({ user: aRecs[0] });
+
+              // set login token in header and return success
+              const user = aRecs[0]
+              const token = getJwtLoginToken(user.id);
+              res.set('Auth', `Bearer: ${token}`).status(200).json({ user });
               return;
+              // res.status(201).json({ user: aRecs[0] });
+              // return;
             })
             .catch((error) => {
               next(routeCatch(`--- (3) POST /users route, error: `, error));
@@ -147,6 +155,24 @@ router.patch('/:id', (req, res, next) => {
     });
 });
 
+
+/* **************************************************
+*  getJwtLoginToken
+*  prepare the header with login JWT
+*  example usage:
+*     const token = getJwtLoginToken(user.id);
+*     res.set('Auth', `Bearer: ${token}`).status(200).json({ user });
+*  @return token
+***************************************************** */
+function getJwtLoginToken(userId) {
+  const payload = {
+    userId: userId,
+    loggedIn: true,
+  };
+  console.log('----- JWT_KEY: ', process.env.JWT_KEY);
+  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7 days' });
+  return token;
+}
 /* **************************************************
 *  POST /login
 *  Try to log in the user, if successful set JWT in header
@@ -191,17 +217,22 @@ router.post('/login', (req, res, next) => {
             return;
           }
 
-          // setup the JWT
-          const payload = {
-            userId: user.id,
-            loggedIn: true,
-          };
-          console.log('----- JWT_KEY: ', process.env.JWT_KEY);
-          const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7 days' });
-
-          // set token in header and return success
+          // set login token in header and return success
+          const token = getJwtLoginToken(user.id);
           res.set('Auth', `Bearer: ${token}`).status(200).json({ user });
           return;
+
+          // // setup the JWT
+          // const payload = {
+          //   userId: user.id,
+          //   loggedIn: true,
+          // };
+          // console.log('----- JWT_KEY: ', process.env.JWT_KEY);
+          // const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7 days' });
+          //
+          // // set token in header and return success
+          // res.set('Auth', `Bearer: ${token}`).status(200).json({ user });
+          // return;
         })
         .catch((error) => {
           next(routeCatch(`--- GET /users route`, error));
