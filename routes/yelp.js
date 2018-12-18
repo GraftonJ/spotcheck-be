@@ -40,7 +40,7 @@ router.post('/', (req, res, next) => {
   // TODO: make the query on check_ins table a SUM
 
   // get comments for list of Yelp locaIds
-  knex('comments')
+  const promise1 = knex('comments')
     .whereIn('loca_id', aLocaIds)
     .join('users', 'users.id', 'user_id')
     .select('comments.*', 'users.name', 'users.dog_names')
@@ -57,46 +57,42 @@ router.post('/', (req, res, next) => {
           rating: rec.rating,
           comment: rec.comment,
         };
-      })
-    })
+      });
+    });
 
-    // get check_ins for list of Yelp locaIds
+  // get check_ins for list of Yelp locaIds
+  const promise2 = knex('check_ins')
+    .whereIn('loca_id', aLocaIds)
+    .join('users', 'users.id', 'user_id')
+    .select('check_ins.*', 'users.name', 'users.dog_names')
+    .then((aRecs) => {
+      aCheckIns = aRecs;
+    });
+
+  Promise.all([promise1, promise2])
+    // build and return data structure: array of Yelp loca_ids with summary
+    //   infromation on the comments and checkins for EACH location.
+    //   Will fill in 0 and [] for location without checkins or comments.
     .then(() => {
-      knex('check_ins')
-        .whereIn('loca_id', aLocaIds)
-        .join('users', 'users.id', 'user_id')
-        .select('check_ins.*', 'users.name', 'users.dog_names')
-        .then((aRecs) => {
-          aCheckIns = aRecs;
-        })
+      const aLocaInfo = [];
+      for (const locaId of aLocaIds) {
 
-        // build and return data structure: array of Yelp loca_ids with summary
-        //   infromation on the comments and checkins for EACH location.
-        //   Will fill in 0 and [] for location without checkins or comments.
-        .then(() => {
-          const aLocaInfo = [];
-          for (const locaId of aLocaIds) {
+        const objLocaInfo = {
+          id: locaId,
+          numCheckIns: aCheckIns.reduce((cnt, checkIn) => {
+            return cnt + ((checkIn.loca_id === locaId) ? 1 : 0);
+          }, 0),
+          comments: aComments.filter(comment => comment.locaId === locaId).reverse(),
+        };
 
-            const objLocaInfo = {
-              id: locaId,
-              numCheckIns: aCheckIns.reduce((cnt, checkIn) => {
-                return cnt + ((checkIn.loca_id === locaId) ? 1 : 0);
-              }, 0),
-              comments: aComments.filter(comment => comment.locaId === locaId).reverse(),
-            };
-
-            aLocaInfo.push(objLocaInfo);
-          }
-          res.status(200).json(aLocaInfo);
-        })
-        // catch errors
-        .catch((error) => {
-          next(routeCatch(`--- GET /yelp route`, error));
-        });
+        aLocaInfo.push(objLocaInfo);
+      }
+      res.status(200).json(aLocaInfo);
     })
-    .catch((err) => {
-      console.log("--- try/catch ERROR: ", err);
-      res.status(500).json(err);
+    // catch errors
+    .catch((error) => {
+      next(routeCatch(`--- GET /yelp route`, error));
     });
 });
+
 module.exports = router;
