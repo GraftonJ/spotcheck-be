@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../knex')
 
+const authMW  = require('./authMiddleware')
+
 const routeCatch = require('./routeCatch');
 const { chkBodyParams } = require('./params'); // destructure the chkBodyParams out of require('./params') returned object
 
@@ -13,9 +15,10 @@ const { chkBodyParams } = require('./params'); // destructure the chkBodyParams 
 *  @body rating (integer 1 to 5)
 *  Return
 *    200 { rating: { id, loca_id, user_id, rating } }
+*    403 { error: 'not logged in' } // or another message
 http POST localhost:3000/ratings user_id=1 loca_id=YELP_LOCA_ID_HERE rating=3
 ***************************************************** */
-router.post('', (req, res, next) => {
+router.post('', authMW, (req, res, next) => {
   console.log("-- POST route ratings/: ", req.params.user_id);
   const oParams = {
     user_id: 'int',
@@ -32,8 +35,10 @@ router.post('', (req, res, next) => {
     rating: req.body.rating,
   };
 
-  // TODO: check that there isn't already a rating for this loca by this person
-  //       BETTER:  get that into the table definition file
+
+
+
+
 
   knex('ratings')
     .insert([oRating]) // param is in the format of the fields so use destructuring
