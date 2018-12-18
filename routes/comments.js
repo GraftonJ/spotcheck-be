@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../knex')
 
+const authMW  = require('./authMiddleware')
+
 //Get all records from comments
 //http http://localhost:3000/comments
 router.get('/', (req, res, next) => {
@@ -29,7 +31,7 @@ router.get('/:id', (req, res, next) => {
 
 //Post a comment
 // http POST http://localhost:3000/comments loca_id="YELP_ID" user_id=3 rating=3 comment="This is a test post comment"
-router.post('/', (req, res, next) => {
+router.post('/', authMW, (req, res, next) => {
   knex('comments')
     .insert({
       "loca_id": req.body.loca_id,
