@@ -82,7 +82,7 @@ router.post('/', (req, res, next) => {
               numCheckIns: aCheckIns.reduce((cnt, checkIn) => {
                 return cnt + ((checkIn.loca_id === locaId) ? 1 : 0);
               }, 0),
-              comments: aComments.filter(comment => comment.locaId === locaId),
+              comments: aComments.filter(comment => comment.locaId === locaId).reverse(),
             };
 
             aLocaInfo.push(objLocaInfo);
