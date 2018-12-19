@@ -4,10 +4,11 @@ exports.seed = function(knex, Promise) {
     .then(() => {
       // Inserts seed entries
       return knex('users').insert([
-        {id: 1, name: 'Cassi Bailey', email: 'cbaily@gmail.com', pswd_hash: '$2b$04$ETZS5t9G1eG981XrEC1duu0OjfeME3yzJT1iTFsBk51t69dFfJNNe', dog_names: 'Spot the Dog'},
-        {id: 2, name: 'Steve Wilson', email: 'swilson@gmail.com', pswd_hash: '$2b$04$ETZS5t9G1eG981XrEC1duu0OjfeME3yzJT1iTFsBk51t69dFfJNNe', dog_names: 'Bender and Scooter'},
-        {id: 3, name: 'Isabel Sampson', email: 'isampson@gmail.com', pswd_hash: '$2b$04$ETZS5t9G1eG981XrEC1duu0OjfeME3yzJT1iTFsBk51t69dFfJNNe', dog_names: 'Luna'},
-        {id: 4, name: 'New User', email: 'nuser@gmail.com', pswd_hash: '$2b$04$ETZS5t9G1eG981XrEC1duu0OjfeME3yzJT1iTFsBk51t69dFfJNNe', dog_names: 'Luna'},
+        {id: 1, name: 'Cassi Bailey', email: 'Cbaily@gmail.com', pswd_hash: '$2a$04$4ftzK1OP8JH5CqVsp3Vf..Nrhgj3QP6PN2bHEPO1tRF1LmHuICdNW', dog_names: 'Spot the Dog'},
+        {id: 2, name: 'Steve Wilson', email: 'Swilson@gmail.com', pswd_hash: '$2a$04$4ftzK1OP8JH5CqVsp3Vf..Nrhgj3QP6PN2bHEPO1tRF1LmHuICdNW', dog_names: 'Bender and Scooter'},
+        {id: 3, name: 'Isabel Sampson', email: 'Isampson@gmail.com', pswd_hash: '$2a$04$4ftzK1OP8JH5CqVsp3Vf..Nrhgj3QP6PN2bHEPO1tRF1LmHuICdNW', dog_names: 'Luna'},
+        {id: 4, name: 'Nate User', email: 'Nuser@gmail.com', pswd_hash: '$2a$04$4ftzK1OP8JH5CqVsp3Vf..Nrhgj3QP6PN2bHEPO1tRF1LmHuICdNW', dog_names: 'Luna'},
+        {id: 5, name: 'Elizabeth Silver', email: 'Elizabeth@gmail.com', pswd_hash: '$2a$04$4ftzK1OP8JH5CqVsp3Vf..Nrhgj3QP6PN2bHEPO1tRF1LmHuICdNW', dog_names: 'Luna'},
       ])
       .then(() => {
 				 // Moves id column (PK) auto-incremented to correct value after inserts
