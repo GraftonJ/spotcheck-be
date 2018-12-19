@@ -7,6 +7,9 @@
     "dev": "nodemon ./bin/www",
     "heroku-postbuild": "knex migrate:rollback; knex migrate:latest; knex seed:run;"
   },
+  "engines": {
+    "node": "v10.12.0"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.3",
