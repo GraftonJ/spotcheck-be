@@ -1,5 +1,5 @@
 
-# SpotCheck-be -- backend API for SpotCheck mobile app
+# SpotCheck-be - backend API for SpotCheck mobile app
 
 ## Description
 
